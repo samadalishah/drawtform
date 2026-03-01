@@ -30,6 +30,7 @@ export interface GraphEdgeDto {
 export interface GraphDto {
   id: string;
   name: string;
+  workspaceId?: string;
   nodes: GraphNodeDto[];
   edges: GraphEdgeDto[];
   createdAt: string;

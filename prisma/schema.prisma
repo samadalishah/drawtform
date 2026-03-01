@@ -12,11 +12,26 @@ datasource db {
 model Graph {
   id        String   @id @default(cuid())
   name      String
+  workspaceId String
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   nodes     GraphNode[]
   edges     GraphEdge[]
 
+  @@index([workspaceId, createdAt(sort: Desc)])
   @@map("graphs")
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  ownerIp   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  graphs    Graph[]
+
+  @@index([ownerIp, createdAt(sort: Desc)])
+  @@map("workspaces")
 }
 
 model GraphNode {

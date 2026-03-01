@@ -42,7 +42,8 @@ function GraphNodeCard({ data }: NodeProps) {
   return (
     <div
       className={[
-        "relative overflow-hidden rounded-2xl border bg-white/95 backdrop-blur transition-all",
+        "relative overflow-hidden border bg-white/95 backdrop-blur transition-all",
+        "rounded-xl",
         isStart
           ? "border-cyan-500 shadow-[0_0_0_2px_rgba(6,182,212,0.25),0_14px_30px_-12px_rgba(14,116,144,0.45)]"
           : "border-slate-200/80 shadow-[0_12px_28px_-14px_rgba(15,23,42,0.45)]",
@@ -50,7 +51,7 @@ function GraphNodeCard({ data }: NodeProps) {
       ].join(" ")}
     >
       {isStart && (
-        <span className="absolute left-2 top-2 z-10 rounded-full bg-cyan-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+        <span className="absolute left-2 top-2 z-10 rounded-md border border-cyan-700 bg-cyan-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
           Start
         </span>
       )}
@@ -296,7 +297,7 @@ function NodeDetailsModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:border-slate-400 hover:text-slate-900"
+            className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:border-slate-400 hover:text-slate-900"
           >
             Close
           </button>
@@ -315,18 +316,18 @@ function NodeDetailsModal({
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Depends On</p>
             {incoming.length === 0 ? <p className="text-xs text-slate-500">None</p> : <ul className="space-y-1 text-xs text-slate-700">{incoming.map((n) => <li key={n.id}>{n.label}</li>)}</ul>}
           </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Used By</p>
             {outgoing.length === 0 ? <p className="text-xs text-slate-500">None</p> : <ul className="space-y-1 text-xs text-slate-700">{outgoing.map((n) => <li key={n.id}>{n.label}</li>)}</ul>}
           </div>
         </div>
 
         {metadataEntries.length > 0 && (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Metadata</p>
             <pre className="overflow-x-auto text-xs text-slate-700">{JSON.stringify(node.metadata, null, 2)}</pre>
           </div>
@@ -497,10 +498,10 @@ function FlowView({ nodes, edges }: GraphCanvasProps) {
   return (
     <div className="relative h-full w-full">
       <div className="absolute left-3 top-3 z-20 flex items-center gap-2">
-        <label className="rounded-lg border border-slate-300 bg-white/95 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-700 shadow-sm backdrop-blur">
+        <label className="rounded-md border border-slate-300 bg-white/95 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-700 shadow-sm backdrop-blur">
           Environment
           <select
-            className="ml-2 rounded border border-slate-300 bg-white px-2 py-0.5 text-xs text-slate-700"
+            className="ml-2 rounded-md border border-slate-300 bg-white px-2 py-0.5 text-xs text-slate-700"
             value={activeEnvId}
             onChange={(e) => {
               setSelectedEnvId(e.target.value);
@@ -522,7 +523,7 @@ function FlowView({ nodes, edges }: GraphCanvasProps) {
         <button
           type="button"
           onClick={prettify}
-          className="rounded-lg border border-slate-300 bg-white/95 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-700 shadow-sm backdrop-blur hover:border-cyan-400 hover:text-slate-900"
+          className="rounded-md border border-slate-300 bg-white/95 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-700 shadow-sm backdrop-blur hover:border-cyan-400 hover:text-slate-900"
         >
           Prettify
         </button>
@@ -531,7 +532,7 @@ function FlowView({ nodes, edges }: GraphCanvasProps) {
           onClick={() => {
             void fitView({ duration: 250, padding: 0.2, minZoom: 0.2, maxZoom: 1.2 });
           }}
-          className="rounded-lg border border-slate-300 bg-white/95 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-700 shadow-sm backdrop-blur hover:border-cyan-400 hover:text-slate-900"
+          className="rounded-md border border-slate-300 bg-white/95 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-700 shadow-sm backdrop-blur hover:border-cyan-400 hover:text-slate-900"
         >
           Fit View
         </button>
@@ -577,7 +578,7 @@ function FlowView({ nodes, edges }: GraphCanvasProps) {
 export function GraphCanvas({ nodes, edges }: GraphCanvasProps) {
   if (nodes.length === 0) {
     return (
-      <div className="flex min-h-[500px] w-full items-center justify-center rounded-2xl border border-dashed border-slate-300/80 bg-slate-100/70 text-slate-500">
+      <div className="flex min-h-[500px] w-full items-center justify-center rounded-xl border border-dashed border-slate-300/80 bg-slate-100/70 text-slate-500">
         <p>No nodes to display yet. Upload a Terraform ZIP to render the graph.</p>
       </div>
     );

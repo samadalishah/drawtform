@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getClientIp } from "@/lib/request-ip";
 import type { GetGraphResponse } from "common/dto";
 import type { GraphDto } from "common/dto";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const clientIp = getClientIp(request);
     const graph = await prisma.graph.findUnique({
       where: { id },
       include: {
+        workspace: { select: { ownerIp: true } },
         nodes: true,
         edges: true,
       },
@@ -19,9 +19,13 @@ export async function GET(
     if (!graph) {
       return NextResponse.json({ graph: null } satisfies GetGraphResponse);
     }
+    if (graph.workspace.ownerIp !== clientIp) {
+      return NextResponse.json({ error: "Graph not found" }, { status: 404 });
+    }
     const dto: GraphDto = {
       id: graph.id,
       name: graph.name,
+      workspaceId: graph.workspaceId,
       nodes: graph.nodes.map((n) => ({
         id: n.id,
         label: n.label,

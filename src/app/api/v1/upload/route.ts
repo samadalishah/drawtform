@@ -3,6 +3,7 @@ import JSZip from "jszip";
 import { parseTerraformFiles } from "@/lib/tf-parser";
 import { buildDagFromParsed } from "@/lib/dag";
 import { prisma } from "@/lib/prisma";
+import { getClientIp } from "@/lib/request-ip";
 import type { UploadTerraformResponse } from "common/dto";
 
 const MAX_ZIP_SIZE = 10 * 1024 * 1024; // 10MB
@@ -13,6 +14,26 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const name = (formData.get("name") as string) || "Terraform modules";
+    const workspaceId = (formData.get("workspaceId") as string | null)?.trim();
+
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: "workspaceId is required." },
+        { status: 400 }
+      );
+    }
+
+    const clientIp = getClientIp(request);
+    const workspace = await prisma.workspace.findFirst({
+      where: { id: workspaceId, ownerIp: clientIp },
+      select: { id: true },
+    });
+    if (!workspace) {
+      return NextResponse.json(
+        { error: "Workspace not found for current user." },
+        { status: 404 }
+      );
+    }
 
     if (!file) {
       return NextResponse.json(
@@ -57,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     const graph = await prisma.graph.create({
-      data: { name: envName },
+      data: { name: envName, workspaceId },
     });
 
     const externalIdToDbId = new Map<string, string>();

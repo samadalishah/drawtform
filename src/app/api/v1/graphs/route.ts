@@ -1,10 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getClientIp } from "@/lib/request-ip";
 import type { ListGraphsResponse } from "common/dto";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const workspaceId = request.nextUrl.searchParams.get("workspaceId")?.trim();
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: "workspaceId is required" },
+        { status: 400 }
+      );
+    }
+
+    const clientIp = getClientIp(request);
     const graphs = await prisma.graph.findMany({
+      where: { workspaceId, workspace: { ownerIp: clientIp } },
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, createdAt: true },
     });
