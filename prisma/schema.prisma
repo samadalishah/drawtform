@@ -1,0 +1,55 @@
+// Prisma schema for DrawTform - Terraform module dependency graphs (DAG)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Graph {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  nodes     GraphNode[]
+  edges     GraphEdge[]
+
+  @@map("graphs")
+}
+
+model GraphNode {
+  id            String     @id @default(cuid())
+  graphId       String
+  graph         Graph      @relation(fields: [graphId], references: [id], onDelete: Cascade)
+  externalId    String     // stable id from TF (e.g. "module.vpc" or "aws_db_instance.main")
+  label         String
+  kind          String     // env | module | resource | provider | data
+  resourceType  String?    // e.g. aws_db_instance, google_sql_database_instance
+  thumbnailKey  String?    // e.g. aws-rds, gcp-cloud-sql
+  cloudProvider String?    // aws | gcp | azure | other
+  source        String?    // module source path
+  metadata      Json?      @default("{}")
+  outEdges      GraphEdge[] @relation("SourceNode")
+  inEdges       GraphEdge[] @relation("TargetNode")
+
+  @@unique([graphId, externalId])
+  @@index([graphId])
+  @@map("graph_nodes")
+}
+
+model GraphEdge {
+  id         String    @id @default(cuid())
+  graphId    String
+  graph      Graph     @relation(fields: [graphId], references: [id], onDelete: Cascade)
+  sourceId   String
+  sourceNode GraphNode @relation("SourceNode", fields: [sourceId], references: [id], onDelete: Cascade)
+  targetId   String
+  targetNode GraphNode @relation("TargetNode", fields: [targetId], references: [id], onDelete: Cascade)
+  label      String?
+
+  @@index([graphId])
+  @@index([sourceId, targetId])
+  @@map("graph_edges")
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@drawtform/common",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dto/index.ts",
+  "types": "./dto/index.ts",
+  "exports": {
+    ".": "./dto/index.ts"
+  }
+}

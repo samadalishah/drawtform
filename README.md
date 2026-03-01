@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DrawTform
 
-## Getting Started
+Next.js full-stack app to **upload a folder of Terraform modules** (as a zip), parse them, and **visualize module/resource dependencies** as a DAG (Directed Acyclic Graph) from env (e.g. prod/staging/main) down to providers. The backend stores the graph in **PostgreSQL** using **Prisma** with migrations; the UI shows each node with **thumbnails** (e.g. AWS RDS, GCP Cloud SQL).
 
-First, run the development server:
+## Stack
+
+- **Next.js** (App Router, latest)
+- **PostgreSQL** + **Prisma** (migrations)
+- **Common DTOs** in `common/` for API contracts (BE/FE)
+- **DAG** for Terraform dependency structure
+- **React Flow** for the canvas; custom nodes with resource thumbnails
+
+## Setup
+
+1. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+2. **Database (PostgreSQL via Docker Compose)**
+
+   - Start Postgres:
+
+     ```bash
+     docker compose up -d
+     ```
+
+   - Copy env and use the URL that matches `docker-compose.yml`:
+
+     ```bash
+     cp .env.example .env
+     ```
+
+     `.env.example` already has:
+
+     `DATABASE_URL="postgresql://drawtform:drawtform@localhost:5432/drawtform"`
+
+   - Run migrations:
+
+     ```bash
+     npx prisma migrate deploy
+     ```
+
+     Or for development (creates migration if needed):
+
+     ```bash
+     npx prisma migrate dev
+     ```
+
+3. **Run the app**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000).
+
+## Commands to run the app (quick reference)
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start PostgreSQL
+docker compose up -d
+
+# 3. Copy env (DATABASE_URL already set for Docker Postgres)
+cp .env.example .env
+
+# 4. Apply migrations
+npx prisma migrate deploy
+
+# 5. Start the Next.js app
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open **http://localhost:3000**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Upload**: Zip a folder containing `.tf` files (e.g. `terraform-modules.zip`). Optionally set an environment name (e.g. `prod`, `staging`, `main`).
+2. **View graph**: After upload, the app shows the dependency graph: env → modules → resources → providers, with thumbnails (e.g. AWS RDS, GCP Cloud SQL, generic module/provider).
+3. **Saved graphs**: Use “Load saved graphs” and the dropdown to open a previously uploaded graph.
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+- `common/dto/` – Shared API types and DTOs (upload, graph, types).
+- `prisma/` – Schema and migrations (Graph, GraphNode, GraphEdge).
+- `src/app/api/` – API routes: `POST /api/upload`, `GET /api/graphs`, `GET /api/graph/[id]`.
+- `src/lib/` – Terraform parser, DAG builder, thumbnail mapping, Prisma client.
+- `src/components/` – Upload UI, graph canvas (React Flow), resource thumbnail component.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` – Start dev server (Turbopack).
+- `npm run build` – Production build.
+- `npm run start` – Start production server.
+- `npx prisma migrate dev` – Apply/create migrations (dev).
+- `npx prisma migrate deploy` – Apply migrations (production).
+- `npx prisma generate` – Regenerate Prisma client.
